@@ -4,7 +4,11 @@ import { MongoMemoryServer } from 'mongodb-memory-server-core';
 import mongoose from 'mongoose';
 import { expect } from 'chai';
 
-import { createDatabaseManager, DatabaseClientConfig, DatabaseManager } from '../../src';
+import {
+  createDatabaseManager,
+  DatabaseClientConfig,
+  DatabaseManager
+} from '../../src';
 
 const servers: Map<string, MongoMemoryServer> = new Map();
 
@@ -12,9 +16,7 @@ servers.set('primary', new MongoMemoryServer());
 servers.set('secondary', new MongoMemoryServer());
 servers.set('tertiary', new MongoMemoryServer());
 
-const methods = [
-  'connect', 'connection', 'disconnect', 'disconnectAll'
-];
+const methods = ['connect', 'connection', 'disconnect', 'disconnectAll'];
 
 describe('Database', function () {
   this.timeout(30000);
@@ -77,8 +79,7 @@ describe('Database', function () {
   });
 
   it('should update a connection with a valid config as default', async function () {
-    const uri = await servers.get('primary').getConnectionString();
-
+    const uri = await servers.get('primary').getUri();
     db.add('default', {
       ...config,
       uri
@@ -132,9 +133,12 @@ describe('Database', function () {
   it('should register a model', function () {
     const conn = db.connection('default');
 
-    const Person = conn.model('person', new mongoose.Schema({
-      name: String
-    }));
+    const Person = conn.model(
+      'person',
+      new mongoose.Schema({
+        name: String
+      })
+    );
 
     expect(Person).to.be.a('function');
     expect(Person).to.have.property('name');
@@ -151,7 +155,7 @@ describe('Database', function () {
     for (const name of servers.keys()) {
       db.add(name, {
         ...config,
-        uri: await servers.get(name).getConnectionString()
+        uri: await servers.get(name).getUri()
       });
 
       expect(db.clients.has(name)).to.be.true;
